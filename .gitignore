@@ -1,0 +1,17 @@
+#java specific
+*.class
+target/
+
+
+#ignore personal stuff 
+nbproject/private/
+nb-configuration.xml
+
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+
