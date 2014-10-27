@@ -4,20 +4,25 @@
  */
 package com.feed.api.services;
 
+import static com.feed.api.constants.Sort.desc;
 import com.feed.api.domain.Feed;
 import com.feed.api.domain.FeedOptions;
 import com.feed.api.exceptions.ValidationException;
 import com.feed.api.helpers.FeedAggregator;
 import com.feed.api.helpers.FeedHelper;
+import com.feed.api.helpers.sorting.ChronologicalAsc;
 import com.feed.api.helpers.sorting.ChronologicalDesc;
 import com.feed.api.helpers.sorting.RoundRobin;
+import com.feed.api.helpers.sorting.Unsorted;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +35,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FeedService {
 
+    private static Map<String, List<Feed>> cache = new HashMap<String, List<Feed>>();
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(FeedService.class);
 
     public List<Feed> find(FeedOptions options) throws Exception {
@@ -38,13 +44,21 @@ public class FeedService {
 
         for (String feedUrl : options.getUrls()) {
 
-            List<Feed> feedResult = this.find(feedUrl);
+
+            List<Feed> feedResult = null;
+
+            feedResult = cache.get(feedUrl);
+            
+            if (feedResult == null) {
+                logger.info("searching for feed ["+feedUrl+"]");
+                feedResult = this.find(feedUrl);
+                cache.put(feedUrl, feedResult);
+            }
+
             feedAggregator.add(feedResult);
         }
 
-        List<Feed> sort = sortResults(feedAggregator, options);
-
-        return sort;
+        return feedAggregator.sortResults(options.getSort());
 
     }
 
@@ -66,39 +80,8 @@ public class FeedService {
             return new ArrayList<Feed>();
         }
 
-        List entries = feed.getEntries();
-
-        List<Feed> feeds = FeedHelper.convertFeedEntriesToModels(entries);
-
-        return feeds;
+        return FeedHelper.convertFeedEntriesToModels(feed.getEntries());
 
     }
 
-    /**
-     *
-     * Sort feeds based based based on a sorting strategy
-     *
-     * @param feedAggregator
-     * @param options
-     * @return
-     */
-    private List<Feed> sortResults(FeedAggregator feedAggregator, FeedOptions options) {
-
-        List<Feed> sort;
-
-        switch (options.getSort()) {
-            case DESC:
-                sort = feedAggregator.sort(new ChronologicalDesc());
-                break;
-
-            case ROUNDROBIN:
-                sort = feedAggregator.sort(new RoundRobin());
-                break;
-
-            default:
-                sort = feedAggregator.sort(new ChronologicalDesc());
-        }
-
-        return sort;
-    }
 }

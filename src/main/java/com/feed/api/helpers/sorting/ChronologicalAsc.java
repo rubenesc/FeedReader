@@ -14,13 +14,13 @@ import java.util.List;
  *
  * @author ruben
  */
-public class ChronologicalDesc implements SortingStrategy {
+public class ChronologicalAsc implements SortingStrategy {
 
     Comparator<Feed> comparator = new Comparator<Feed>() {
         
         public int compare(Feed m1, Feed m2) {
             
-            return m2.getPublished().compareTo(m1.getPublished());
+            return m1.getPublished().compareTo(m2.getPublished());
         }
         
     };
