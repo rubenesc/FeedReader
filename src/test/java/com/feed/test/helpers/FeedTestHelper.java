@@ -18,7 +18,21 @@ import org.slf4j.LoggerFactory;
 public class FeedTestHelper {
  
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(FeedServiceTest.class);
-    
+
+    public static void validateFeedSortedChronologicalAsc(List<Feed> feeds) {
+        Feed previous = null;
+        for (Iterator<Feed> it = feeds.iterator(); it.hasNext();) {
+            Feed feed = it.next();
+            logger.info("[" + feed.getTitle() + "][" + feed.getPublished() + "]");
+
+            if (previous != null) {
+                boolean isAfter = previous.getPublished().after(feed.getPublished());
+                Assert.assertFalse("Feed is not in chronological ascending order, [" + previous.getPublished() + "] shoud come before [" + feed.getPublished() + "]", isAfter);
+            }
+
+            previous = feed;
+        }
+    }    
     public static void validateFeedSortedChronologicalDesc(List<Feed> feeds) {
         Feed previous = null;
         for (Iterator<Feed> it = feeds.iterator(); it.hasNext();) {
@@ -26,8 +40,8 @@ public class FeedTestHelper {
             logger.info("[" + feed.getTitle() + "][" + feed.getPublished() + "]");
 
             if (previous != null) {
-                boolean isChro = previous.getPublished().before(feed.getPublished());
-                Assert.assertFalse("Feed is not in chronological descending order [" + previous.getPublished() + "]<[" + feed.getPublished() + "]", isChro);
+                boolean isBefore = previous.getPublished().before(feed.getPublished());
+                Assert.assertFalse("Feed is not in chronological descending order [" + previous.getPublished() + "] should come after [" + feed.getPublished() + "]", isBefore);
             }
 
             previous = feed;

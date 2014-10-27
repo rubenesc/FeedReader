@@ -9,7 +9,7 @@ import com.feed.api.domain.Feed;
 import com.feed.api.domain.FeedOptions;
 import com.feed.api.services.FeedService;
 import com.feed.test.helpers.FeedTestHelper;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.After;
@@ -46,18 +46,44 @@ public class FeedServiceTest {
     public void tests() throws Exception {
 
         testFindFeed();
-        testFindFeedsSortChronologicalDescending();
+        testFindFeedsSortChronologicalDesc();
         testFindFeedsSortRoundRobin();
+        testFindFeedsSortNull();
         
     }
+    
+    private void testFindFeedsSortNull() throws Exception {
+        
+        List<String> urls = new ArrayList<String>();
+        urls.add("http://tuneage.com/rss");
+        urls.add("http://metallica.tumblr.com/rss");
+        urls.add("http://blog.bandpage.com/feed/");
+        
+        FeedOptions options = new FeedOptions(urls);
+        
+        logger.info("");
+        logger.info("[Find Feeds sort null][" + options.getUrls().size() + "]["+ options.getSort()+"]");
+        
+        List<Feed> feeds = feedService.find(options);
+        Assert.assertNotNull("Feeds should not be null", feeds);
+
+        for (Iterator<Feed> it = feeds.iterator(); it.hasNext();) {
+            Feed feed = it.next();
+            logger.info("[" + feed.getLink() + "][" + feed.getPublished() + "]");
+        }
+        
+    
+    }
+    
 
     private void testFindFeedsSortRoundRobin() throws Exception {
         
-        FeedOptions options = new FeedOptions();
-        options.getUrls().add("http://tuneage.com/rss");
-        options.getUrls().add("http://metallica.tumblr.com/rss");
-        options.getUrls().add("http://blog.bandpage.com/feed/");
-        options.setSort(Sort.ROUNDROBIN);
+        List<String> urls = new ArrayList<String>();
+        urls.add("http://tuneage.com/rss");
+        urls.add("http://metallica.tumblr.com/rss");
+        urls.add("http://blog.bandpage.com/feed/");
+        
+        FeedOptions options = new FeedOptions(urls, Sort.round);
         
         logger.info("");
         logger.info("[Find Feeds sort round robin][" + options.getUrls().size() + "]["+ options.getSort()+"]");
@@ -76,13 +102,15 @@ public class FeedServiceTest {
         
     }
 
-    private void testFindFeedsSortChronologicalDescending() throws Exception {
+    private void testFindFeedsSortChronologicalDesc() throws Exception {
 
-        FeedOptions options = new FeedOptions();
-        options.getUrls().add("http://tuneage.com/rss");
-        options.getUrls().add("http://metallica.tumblr.com/rss");
-        options.getUrls().add("http://blog.bandpage.com/feed/");
-
+        List<String> urls = new ArrayList<String>();
+        urls.add("http://tuneage.com/rss");
+        urls.add("http://metallica.tumblr.com/rss");
+        urls.add("http://blog.bandpage.com/feed/");
+        
+        FeedOptions options = new FeedOptions(urls, Sort.desc);
+        
         logger.info("");
         logger.info("[Find Feeds sort chronological descending][" + options.getUrls().size() + "]["+ options.getSort()+"]");
 

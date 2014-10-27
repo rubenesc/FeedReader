@@ -9,5 +9,18 @@ package com.feed.api.constants;
  * @author ruben
  */
 public enum Sort {
-    DESC, ROUNDROBIN;
+    
+    asc, desc, round;
+    
+    public static Sort getEnum(String value) {
+
+        for (Sort sort : Sort.values()) {
+            if (sort.name().equals(value)) {
+                return sort;
+            }
+        }
+
+        return null;
+    }    
+    
 }

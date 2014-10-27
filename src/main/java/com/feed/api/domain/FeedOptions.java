@@ -4,9 +4,11 @@
  */
 package com.feed.api.domain;
 
-import com.feed.api.constants.Sort;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import com.feed.api.constants.Sort;
+import com.feed.api.exceptions.ValidationException;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -15,7 +17,7 @@ import java.util.List;
 public class FeedOptions {
     
     private List<String> urls;
-    private Sort sort = Sort.DESC; //Default Value
+    private Sort sort;
 
     public FeedOptions() {
         urls = new ArrayList<String>();
@@ -28,6 +30,28 @@ public class FeedOptions {
     public FeedOptions(List<String> urls, Sort sort) {
         this.urls = urls;
         this.sort = sort;
+    }
+    
+    public FeedOptions(List<String> urls, String sortValue) throws ValidationException{
+        
+        if (urls == null) {
+            throw new ValidationException("please specify a feed url");
+        }
+        
+        Sort sortEnum = null;
+        if (!StringUtils.isEmpty(sortValue)) {
+            
+            sortEnum = Sort.getEnum(sortValue);
+            
+            if (sortEnum == null){
+                throw new ValidationException("please specify a valid sort paramter");
+            }
+            
+        }
+        
+        this.urls = urls;
+        this.sort = sortEnum;
+        
     }
 
     public List<String> getUrls() {

@@ -1,6 +1,17 @@
+
 #java specific
 *.class
 target/
+
+#Eclipse
+.classpath
+.project
+.settings/
+
+#Intellij
+.idea/
+*.iml
+*.iws
 
 
 #ignore personal stuff 
