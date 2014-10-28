@@ -4,7 +4,9 @@
  */
 package com.feed.test.api;
 
+import com.feed.api.constants.AppConstants;
 import com.feed.api.domain.Feed;
+import com.feed.api.domain.Group;
 import com.feed.test.helpers.RestClient;
 import com.feed.test.helpers.FeedTestHelper;
 import java.net.URLEncoder;
@@ -19,12 +21,16 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import java.util.Map;
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.ArrayList;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 /**
  *
  * @author ruben
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({"classpath:test-applicationContext.xml"})
 public class FeedApiIT {
 
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(FeedApiIT.class);
@@ -43,12 +49,26 @@ public class FeedApiIT {
     @Test
     public void tests() throws Exception { 
 
+        try {
+            
         testFindFeeds();
         testFindFeedsSortAsc();
         testFindFeedsSortDesc();
         testFindFeedsSortRound();
         
         testFindFeedsInvalidSort();
+        
+            testFindFeedsByGroup();
+//        testFindFeedsByGroupSortAsc();
+//        testFindFeedsByGroupSortDesc();
+//        testFindFeedsByGroupSortRound();
+            
+            
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        
+        
     }
 
     private void testFindFeedsSortRound() throws Exception {
@@ -60,11 +80,9 @@ public class FeedApiIT {
         queryParams.put("url", URLEncoder.encode("http://blog.bandpage.com/feed/", "UTF-8"));
         queryParams.put("sort", "round");
 
-        String getUrl = restClient.FEED_API_URL;
+        logger.info("Api Test Find Feeds sort round");
 
-        logger.info("Api Test Find Feeds sort round  [" + getUrl + "]");
-
-        Response response = restClient.get(getUrl, queryParams);
+        Response response = restClient.get(AppConstants.FEED_PATH, queryParams);
 
         Assert.assertEquals(200, response.getStatus());
 
@@ -90,11 +108,9 @@ public class FeedApiIT {
         queryParams.put("url", URLEncoder.encode("http://blog.bandpage.com/feed/", "UTF-8"));
         queryParams.put("sort", "asc");
 
-        String getUrl = restClient.FEED_API_URL;
+        logger.info("Api Test Find Feeds sort asc");
 
-        logger.info("Api Test Find Feeds sort asc  [" + getUrl + "]");
-
-        Response response = restClient.get(getUrl, queryParams);
+        Response response = restClient.get(AppConstants.FEED_PATH, queryParams);
 
         Assert.assertEquals(200, response.getStatus());
 
@@ -117,11 +133,9 @@ public class FeedApiIT {
         queryParams.put("url", URLEncoder.encode("http://blog.bandpage.com/feed/", "UTF-8"));
         queryParams.put("sort", "desc");
 
-        String getUrl = restClient.FEED_API_URL;
+        logger.info("Api Test Find Feeds sort desc");
 
-        logger.info("Api Test Find Feeds sort desc  [" + getUrl + "]");
-
-        Response response = restClient.get(getUrl, queryParams);
+        Response response = restClient.get(AppConstants.FEED_PATH, queryParams);
 
         Assert.assertEquals(200, response.getStatus());
 
@@ -143,11 +157,9 @@ public class FeedApiIT {
         queryParams.put("url", URLEncoder.encode("http://metallica.tumblr.com/rss", "UTF-8"));
         queryParams.put("url", URLEncoder.encode("http://blog.bandpage.com/feed/", "UTF-8"));
         
-        String getUrl = restClient.FEED_API_URL;
+        logger.info("Api Test Find Feeds");
 
-        logger.info("Api Test Find Feeds  [" + getUrl + "]");
-
-        Response response = restClient.get(getUrl, queryParams);
+        Response response = restClient.get(AppConstants.FEED_PATH, queryParams);
 
         Assert.assertEquals(200, response.getStatus());
 
@@ -171,12 +183,46 @@ public class FeedApiIT {
         queryParams.put("url", URLEncoder.encode("http://tuneage.com/rss", "UTF-8"));
         queryParams.put("sort", "JUNK");
 
-        String getUrl = restClient.FEED_API_URL;
+        logger.info("Api Test Find Feeds invalid sort");
 
-        logger.info("Api Test Find Feeds invalid sort [" + getUrl + "]");
-
-        Response response = restClient.get(getUrl, queryParams);
+        Response response = restClient.get(AppConstants.FEED_PATH, queryParams);
 
         Assert.assertEquals(400, response.getStatus());
+    }
+    
+    
+    
+    private void testFindFeedsByGroup() throws Exception {
+        
+        //create group
+        List<String> urls = new ArrayList<String>();
+        urls.add("http://tuneage.com/rss");
+        urls.add("http://metallica.tumblr.com/rss");
+
+        Group model = new Group("Test Group 10", urls);
+
+        //create item
+        String url = restClient.BASE_URL + AppConstants.GROUP_PATH;
+        Response responsePost = restClient.post(url, model);
+        Assert.assertEquals(201, responsePost.getStatus());
+        Group created = responsePost.readEntity(Group.class);
+        Assert.assertNotNull(created);
+        Assert.assertNotNull(created.getId());
+        
+        //find feeds
+        String itemUrl = AppConstants.FEED_PATH.concat("/").concat(created.getId().toString());
+        Response response = restClient.get(itemUrl);
+        Assert.assertEquals(200, response.getStatus());
+        List<Feed> feeds = response.readEntity(new GenericType<List<Feed>>() {
+        });
+        Assert.assertNotNull("Feeds should not be null", feeds);
+        
+        Assert.assertTrue(feeds.size() > 0);
+        
+        for (Iterator<Feed> it = feeds.iterator(); it.hasNext();) {
+            Feed feed = it.next();
+            logger.info("[" + feed.getTitle() + "][" + feed.getDescription() + "]");
+        }
+        
     }
 }

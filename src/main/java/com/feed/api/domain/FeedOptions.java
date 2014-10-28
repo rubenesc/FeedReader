@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 public class FeedOptions {
     
     private List<String> urls;
+    private Integer groupId;
     private Sort sort;
 
     public FeedOptions() {
@@ -32,28 +33,36 @@ public class FeedOptions {
         this.sort = sort;
     }
     
+    public FeedOptions(Integer groupId, String sortValue) throws ValidationException{
+        this.groupId = groupId;
+        validateSort(sortValue);
+    }
+    
     public FeedOptions(List<String> urls, String sortValue) throws ValidationException{
         
         if (urls == null) {
             throw new ValidationException("please specify a feed url");
         }
         
-        Sort sortEnum = null;
+        this.urls = urls;
+        validateSort(sortValue);
+        
+    }
+    
+    private void validateSort(String sortValue) throws ValidationException {
+        
         if (!StringUtils.isEmpty(sortValue)) {
             
-            sortEnum = Sort.getEnum(sortValue);
+            Sort sortEnum = Sort.getEnum(sortValue);
             
             if (sortEnum == null){
                 throw new ValidationException("please specify a valid sort paramter");
             }
             
+            this.sort = sortEnum;
         }
-        
-        this.urls = urls;
-        this.sort = sortEnum;
-        
-    }
-
+    }    
+     
     public List<String> getUrls() {
         return urls;
     }
@@ -69,6 +78,13 @@ public class FeedOptions {
     public void setSort(Sort sort) {
         this.sort = sort;
     }
-    
+
+    public Integer getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
     
 }

@@ -19,11 +19,24 @@
     <!-- Component Scan Packages for Annotation Driven Configuration -->
     <context:component-scan base-package="com.feed.api.*" />
 
+    <bean id="groupDao" class="com.feed.api.dao.GroupDaoImpl">	
+    </bean>    
+    
     <bean id="feedService" class="com.feed.api.services.FeedService" >
     </bean>       
     
     <bean id="feedResource" class="com.feed.api.resources.FeedResource" >
     	<property name="feedService" ref="feedService"/>
     </bean>
+    
+    <bean id="groupService" class="com.feed.api.services.GroupService" >
+        <property name="groupDao" ref="groupDao"/>
+    </bean>       
+    
+    <bean id="groupResource" class="com.feed.api.resources.GroupResource" >
+    	<property name="groupService" ref="groupService"/>
+    </bean>
+    
+    
     
 </beans>

@@ -4,16 +4,12 @@
  */
 package com.feed.api.services;
 
-import static com.feed.api.constants.Sort.desc;
 import com.feed.api.domain.Feed;
 import com.feed.api.domain.FeedOptions;
+import com.feed.api.domain.Group;
 import com.feed.api.exceptions.ValidationException;
 import com.feed.api.helpers.FeedAggregator;
 import com.feed.api.helpers.FeedHelper;
-import com.feed.api.helpers.sorting.ChronologicalAsc;
-import com.feed.api.helpers.sorting.ChronologicalDesc;
-import com.feed.api.helpers.sorting.RoundRobin;
-import com.feed.api.helpers.sorting.Unsorted;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
@@ -23,9 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +32,9 @@ public class FeedService {
 
     private static Map<String, List<Feed>> cache = new HashMap<String, List<Feed>>();
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(FeedService.class);
+    
+    @Autowired
+    GroupService groupService;
 
     public List<Feed> find(FeedOptions options) throws Exception {
 
@@ -84,4 +82,18 @@ public class FeedService {
 
     }
 
+    public List<Feed> findByGroup(FeedOptions options) throws Exception {
+        
+        Group group = groupService.find(options.getGroupId());
+        options.setUrls(group.getUrls());
+        
+        return this.find(options);
+        
+    }
+    
+    //spring DI
+    public void setGroupService(GroupService groupService) {
+        this.groupService = groupService;
+    }
+    
 }
