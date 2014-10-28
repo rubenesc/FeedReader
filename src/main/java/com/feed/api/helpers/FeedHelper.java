@@ -24,12 +24,6 @@ public class FeedHelper {
 
         for (SyndEntry entry : syndEntries) {
             response.add(new Feed(entry));
-
-            if (entry.getLink().equalsIgnoreCase("http://tuneage.com/post/100854448127")) {
-                logger.info("[title]-[" + entry.getTitle() + "]");
-                logger.info("[title]-[" + entry.getTitle() + "]");
-                logger.info("[title]-[" + entry.getTitle() + "]");
-            }
         }
 
         return response;

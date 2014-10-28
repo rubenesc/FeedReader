@@ -7,6 +7,7 @@ package com.feed.api;
 import com.feed.api.exceptions.mapper.GenericExceptionMapper;
 import com.feed.api.exceptions.mapper.ValidationExceptionMapper;
 import com.feed.api.resources.FeedResource;
+import com.feed.api.resources.GroupResource;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
@@ -25,6 +26,7 @@ public class FeedApiApp extends ResourceConfig {
 
         // register application resources
         register(FeedResource.class);
+        register(GroupResource.class);
 
         registerExceptionMappers();
 
